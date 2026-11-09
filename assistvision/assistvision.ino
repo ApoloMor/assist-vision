@@ -51,17 +51,18 @@ float distForte = DIST_FORTE_PADRAO;
 
 // Servo
 const int ANGULO_REPOUSO = 90;
-const int ANGULO_MEDIO   = 128;
+const int ANGULO_MEDIO   = 126;
 const int ANGULO_FORTE   = 139;
 const int ANGULO_LIMITE  = 140;
-const int PASSO          = 10;
+const int PASSO          = 4;
 
 // Filtro e falhas
-const float SUAVIZACAO                = 0.6;     // 0 a 1: menor = mais estavel, maior = reage mais rapido
+const float SUAVIZACAO                = 0.4;     // 0 a 1: menor = mais estavel, maior = reage mais rapido
 const float ALCANCE_MAX_CM            = 200.0;   // acima disso o VL53L0X nao e confiavel
 const int   INVALIDAS_PARA_FORA       = 5;       // leituras duvidosas seguidas ate considerar "nada na frente"
 const int   FALHAS_PARA_ERRO          = 5;
-const uint32_t TEMPO_MEDICAO_US       = 50000;  // 100 ms por medicao: mais alcance e menos ruido
+const int   CONFIRMAR_LEITURAS        = 3;       // leituras seguidas pedindo o mesmo modo antes de trocar
+const uint32_t TEMPO_MEDICAO_US       = 100000;  // 100 ms por medicao: mais alcance e menos ruido
 const bool  MOSTRAR_LEITURAS          = false;   // true = mostra cada leitura crua no Monitor Serial
 const unsigned long TENTAR_SENSOR_MS  = 5000;
 const unsigned long LER_BATERIA_MS    = 2000;
@@ -76,6 +77,8 @@ WebServer server(80);
 Preferences prefs;
 
 Modo  modoAtual         = REPOUSO;
+Modo  modoCandidato     = REPOUSO;
+int   confirmacoes      = 0;
 float distanciaFiltrada = DIST_FORA;
 int   anguloAtual       = ANGULO_REPOUSO;
 
@@ -232,12 +235,30 @@ const char* nomeModo(Modo m) {
   return "REPOUSO";
 }
 
+const unsigned long SOLTAR_SERVO_MS = 800;   // tempo parado em repouso antes de soltar o servo
+unsigned long ultimoMovimento = 0;
+
 void moverServo(int alvo) {
   alvo = constrain(alvo, ANGULO_REPOUSO, ANGULO_LIMITE);
-  if (anguloAtual == alvo) return;
+
+  if (anguloAtual == alvo) {
+    // em repouso nao precisa segurar: desliga o pulso para o servo nao reagir a ruido
+    if (alvo == ANGULO_REPOUSO && servo.attached() && millis() - ultimoMovimento > SOLTAR_SERVO_MS) {
+      servo.detach();
+      pinMode(PINO_SERVO, OUTPUT);
+      digitalWrite(PINO_SERVO, LOW);
+    }
+    return;
+  }
+
+  if (!servo.attached()) {
+    servo.attach(PINO_SERVO, 500, 2400);
+  }
+
   if (anguloAtual < alvo) anguloAtual = min(anguloAtual + PASSO, alvo);
   else                    anguloAtual = max(anguloAtual - PASSO, alvo);
   servo.write(anguloAtual);
+  ultimoMovimento = millis();
 }
 
 // Calibracao (Preferences)
@@ -481,11 +502,13 @@ void loop() {
   } else {
     float d;
     bool valida;
+    bool leituraNova = false;
     if (lerDistanciaCm(d, valida)) {
       falhasSeguidas = 0;
 
       if (valida) {
         invalidasSeguidas = 0;
+        leituraNova = true;
         float m = medianaDasUltimas(d);
         if (distanciaFiltrada >= DIST_FORA) distanciaFiltrada = m;   // voltou a ver: comeca do valor real
         else distanciaFiltrada = SUAVIZACAO * m + (1 - SUAVIZACAO) * distanciaFiltrada;
@@ -495,6 +518,7 @@ void loop() {
         if (invalidasSeguidas >= INVALIDAS_PARA_FORA) {
           distanciaFiltrada = DIST_FORA;   // muitas seguidas: nada na frente
           totalLeituras = 0;
+          leituraNova = true;
         }
       }
     } else {
@@ -507,10 +531,23 @@ void loop() {
     }
 
     Modo novoModo = sensorOk ? decidirModo(distanciaFiltrada, modoAtual) : REPOUSO;
-    if (novoModo != modoAtual) {
-      Serial.print(">>> Mudou para: ");
-      Serial.println(nomeModo(novoModo));
-      modoAtual = novoModo;
+
+    if (!sensorOk || novoModo == modoAtual) {
+      confirmacoes = 0;
+      if (!sensorOk) modoAtual = REPOUSO;
+    } else if (leituraNova) {
+      // so troca de modo se varias leituras seguidas concordarem (ignora leitura falsa isolada)
+      if (novoModo != modoCandidato) {
+        modoCandidato = novoModo;
+        confirmacoes = 0;
+      }
+      confirmacoes++;
+      if (confirmacoes >= CONFIRMAR_LEITURAS) {
+        Serial.print(">>> Mudou para: ");
+        Serial.println(nomeModo(novoModo));
+        modoAtual = novoModo;
+        confirmacoes = 0;
+      }
     }
   }
 
