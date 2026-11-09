@@ -11,12 +11,12 @@
 
 // Wi-Fi
 // Roteador do celular
-const char* CELULAR_REDE  = "Sonic Maligno";
+const char* CELULAR_REDE  = "AssistVision";
 const char* CELULAR_SENHA = "senha1234";
 const unsigned long TEMPO_CONEXAO_MS = 15000;
 
 // Rede propria, se nao achar o celular
-const char* PROPRIA_REDE  = "AssistVision";
+const char* PROPRIA_REDE  = "AssistVisionESP";
 const char* PROPRIA_SENHA = "assist1234";       // minimo de 8 caracteres
 
 const char* NOME_MDNS = "assistvision";         // endereco: http://assistvision.local
@@ -235,30 +235,12 @@ const char* nomeModo(Modo m) {
   return "REPOUSO";
 }
 
-const unsigned long SOLTAR_SERVO_MS = 800;   // tempo parado em repouso antes de soltar o servo
-unsigned long ultimoMovimento = 0;
-
 void moverServo(int alvo) {
   alvo = constrain(alvo, ANGULO_REPOUSO, ANGULO_LIMITE);
-
-  if (anguloAtual == alvo) {
-    // em repouso nao precisa segurar: desliga o pulso para o servo nao reagir a ruido
-    if (alvo == ANGULO_REPOUSO && servo.attached() && millis() - ultimoMovimento > SOLTAR_SERVO_MS) {
-      servo.detach();
-      pinMode(PINO_SERVO, OUTPUT);
-      digitalWrite(PINO_SERVO, LOW);
-    }
-    return;
-  }
-
-  if (!servo.attached()) {
-    servo.attach(PINO_SERVO, 500, 2400);
-  }
-
+  if (anguloAtual == alvo) return;
   if (anguloAtual < alvo) anguloAtual = min(anguloAtual + PASSO, alvo);
   else                    anguloAtual = max(anguloAtual - PASSO, alvo);
   servo.write(anguloAtual);
-  ultimoMovimento = millis();
 }
 
 // Calibracao (Preferences)
