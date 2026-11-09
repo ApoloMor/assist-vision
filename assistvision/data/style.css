@@ -1,0 +1,166 @@
+:root {
+  --fundo: #F7F6F2;
+  --cartao: #FFFFFC;
+  --borda: #DDD9CE;
+  --texto: #3D4655;
+  --titulo: #14213D;
+  --suave: #6B7280;
+  --verde: #1F6F78;
+  --laranja: #A44A1C;
+  --vermelho: #B42318;
+  --fundo-vermelho: #FEF3F2;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  line-height: 1.4;
+}
+
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--titulo);
+  color: #F7F6F2;
+}
+
+h1 { margin: 0; font-size: 1.4rem; }
+h2 { margin: 0 0 8px; font-size: 1.05rem; color: var(--titulo); }
+.sub { margin: 0; font-size: 0.9rem; color: #C9D3E3; }
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cartao {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.destaque { text-align: center; }
+.rotulo { margin: 0; color: var(--suave); }
+.numero { margin: 4px 0; font-size: 3.5rem; font-weight: 700; color: var(--titulo); }
+.numero small { font-size: 1.2rem; font-weight: 400; }
+.numero-medio { margin: 0 0 8px; font-size: 2rem; font-weight: 700; color: var(--titulo); }
+.detalhe { margin: 4px 0; color: var(--texto); }
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.modo {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.modo-repouso { background: #ECEAE3; color: var(--titulo); }
+.modo-medio   { background: #E0F0F1; color: var(--verde); border: 2px solid var(--verde); }
+.modo-forte   { background: var(--titulo); color: #F2A65A; }
+
+.etiqueta {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.etiqueta-ok     { background: #E0F0F1; color: var(--verde); }
+.etiqueta-espera { background: #ECEAE3; color: var(--titulo); }
+.etiqueta-erro   { background: var(--fundo-vermelho); color: var(--vermelho); }
+
+.barra {
+  height: 12px;
+  background: #ECEAE3;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.barra-preenchida {
+  height: 100%;
+  width: 0;
+  background: var(--verde);
+  transition: width 0.4s;
+}
+.barra-preenchida.baixa { background: var(--laranja); }
+.barra-preenchida.critica { background: var(--vermelho); }
+
+.lista-erros, .lista-eventos { margin: 0; padding: 0; list-style: none; }
+.lista-erros li {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid var(--vermelho);
+  background: var(--fundo-vermelho);
+  border-radius: 6px;
+}
+.lista-erros li.sem-erro {
+  border-left-color: var(--verde);
+  background: #E0F0F1;
+  color: var(--verde);
+}
+.lista-eventos li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--borda);
+  font-size: 0.9rem;
+}
+.lista-eventos .hora { color: var(--suave); margin-right: 8px; font-variant-numeric: tabular-nums; }
+
+form label { display: block; margin: 12px 0 4px; font-weight: 600; }
+.linha { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+input[type="number"] {
+  width: 110px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+button {
+  padding: 10px 16px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--titulo);
+  color: #F7F6F2;
+  cursor: pointer;
+}
+.botao-secundario {
+  background: #ECEAE3;
+  color: var(--titulo);
+}
+.linha:last-of-type { margin-top: 16px; }
+.mensagem { min-height: 1.4em; margin: 8px 0 0; font-weight: 600; }
+.mensagem.ok { color: var(--verde); }
+.mensagem.erro { color: var(--vermelho); }
+
+.faixa-sinal {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 12px 16px;
+  background: var(--vermelho);
+  color: #FFFFFF;
+  text-align: center;
+}
+
+.rodape {
+  text-align: center;
+  padding: 16px;
+  color: var(--suave);
+  font-size: 0.85rem;
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AssistVision</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="faixa-sinal" class="faixa-sinal" role="alert" hidden>
+    <strong>Sinal perdido.</strong> Sem resposta do dispositivo há <span id="tempo-sem-sinal">0</span> s.
+  </div>
+
+  <header class="topo">
+    <div>
+      <h1>AssistVision</h1>
+      <p class="sub">Painel do dispositivo</p>
+    </div>
+    <span id="conexao" class="etiqueta etiqueta-espera">Conectando…</span>
+  </header>
+
+  <main>
+    <section class="cartao destaque" aria-live="polite">
+      <p class="rotulo">Distância do obstáculo</p>
+      <p class="numero"><span id="distancia">--</span> <small>cm</small></p>
+      <p><span id="modo" class="modo modo-repouso">REPOUSO</span></p>
+      <p class="detalhe">Servo em <span id="angulo">--</span>°</p>
+    </section>
+
+    <div class="grade">
+      <section class="cartao">
+        <h2>Bateria</h2>
+        <p class="numero-medio"><span id="bateria-percentual">--</span></p>
+        <div class="barra"><div id="bateria-barra" class="barra-preenchida"></div></div>
+        <p id="bateria-texto" class="detalhe">Aguardando dados…</p>
+      </section>
+
+      <section class="cartao">
+        <h2>Sistema</h2>
+        <p class="detalhe">Sensor: <strong id="sensor-estado">--</strong></p>
+        <p class="detalhe">Ligado há: <strong id="tempo-ligado">--</strong></p>
+        <p class="detalhe">Wi-Fi: <strong id="wifi-rede">--</strong></p>
+        <p class="detalhe">Sinal: <strong id="wifi-sinal">--</strong></p>
+        <p class="detalhe">Endereço: <strong id="wifi-ip">--</strong></p>
+      </section>
+    </div>
+
+    <section class="cartao">
+      <h2>Erros</h2>
+      <ul id="erros" class="lista-erros">
+        <li class="sem-erro">Nenhum erro.</li>
+      </ul>
+    </section>
+
+    <section class="cartao">
+      <h2>Calibração</h2>
+      <p class="detalhe">Defina a partir de que distância o servo começa a apertar.</p>
+      <form id="form-calibracao">
+        <label for="dist-medio">Pressão média abaixo de (cm)</label>
+        <div class="linha">
+          <input id="dist-medio" name="distMedio" type="number" min="10" max="200" step="1" required>
+          <button type="button" class="botao-secundario" data-usar="dist-medio">Usar distância atual</button>
+        </div>
+
+        <label for="dist-forte">Pressão forte abaixo de (cm)</label>
+        <div class="linha">
+          <input id="dist-forte" name="distForte" type="number" min="10" max="200" step="1" required>
+          <button type="button" class="botao-secundario" data-usar="dist-forte">Usar distância atual</button>
+        </div>
+
+        <div class="linha">
+          <button type="submit">Salvar</button>
+          <button type="button" id="restaurar" class="botao-secundario">Voltar ao padrão</button>
+        </div>
+        <p id="mensagem-calibracao" class="mensagem" role="status"></p>
+      </form>
+    </section>
+
+    <section class="cartao">
+      <h2>Histórico</h2>
+      <ul id="eventos" class="lista-eventos"></ul>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <span id="modo-demo" hidden>Modo demonstração: dados simulados, sem ESP32.</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
