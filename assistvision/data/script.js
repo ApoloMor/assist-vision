@@ -1,4 +1,4 @@
-// ===================== CONFIGURACAO =====================
+// config
 const INTERVALO_MS = 700;        // de quanto em quanto tempo pergunta ao ESP32
 const TEMPO_LIMITE_MS = 3000;    // quanto espera cada resposta
 const SINAL_PERDIDO_MS = 6000;   // sem resposta por esse tempo = sinal perdido
@@ -7,7 +7,7 @@ const SINAL_PERDIDO_MS = 6000;   // sem resposta por esse tempo = sinal perdido
 const MODO_DEMO = location.protocol === "file:";
 
 const MENSAGENS_ERRO = {
-  SENSOR_AUSENTE: "Sensor de distância não encontrado. Confira os fios VCC (5V), GND, SDA (33) e SCL (32).",
+  SENSOR_AUSENTE: "Sensor de distância não encontrado. Confira os fios VCC (3V3), GND, SDA (21) e SCL (22).",
   SENSOR_PAROU: "O sensor parou de responder. Tentando reconectar a cada 5 segundos.",
   BATERIA_BAIXA: "Bateria baixa. Recarregue pelo USB-C do carregador.",
   BATERIA_CRITICA: "Bateria crítica. O dispositivo pode desligar a qualquer momento.",
@@ -21,7 +21,7 @@ let formularioPreenchido = false;
 
 const $ = (id) => document.getElementById(id);
 
-// ===================== MODO DEMONSTRACAO =====================
+// modo demonstracao
 const demo = {
   inicio: Date.now(),
   distMedio: 120,
@@ -43,7 +43,7 @@ function statusDemo() {
     angulo: demo.angulo,
     sensorOk: true,
     tempoLigado: Math.floor(t),
-    wifi: { modo: "celular", rede: "Celular do grupo", ip: "192.168.43.25", mac: "AA:BB:CC:DD:EE:FF", sinal: -58 },
+    wifi: { modo: "celular", rede: "Celular do grupo", ip: "192.168.43.25", sinal: -58 },
     config: { distMedio: demo.distMedio, distForte: demo.distForte },
     bateria: { disponivel: true, tensao: 3.86, percentual: 66 },
     erros: [],
@@ -51,7 +51,7 @@ function statusDemo() {
   };
 }
 
-// ===================== BUSCAR DADOS =====================
+// buscar dados
 async function buscarStatus() {
   if (MODO_DEMO) return statusDemo();
 
@@ -77,7 +77,7 @@ async function atualizar() {
   }
 }
 
-// ===================== PERDA DE SINAL =====================
+// perda de sinal
 function verificarSinal() {
   const semResposta = Date.now() - ultimaResposta;
   if (semResposta < SINAL_PERDIDO_MS) return;
@@ -108,7 +108,7 @@ function adicionarEventoLocal(texto) {
   if (eventosLocais.length > 5) eventosLocais.pop();
 }
 
-// ===================== MOSTRAR NA TELA =====================
+// mostrar na tela
 function mostrar(d) {
   $("conexao").textContent = MODO_DEMO ? "Demonstração" : "Conectado";
   $("conexao").className = "etiqueta etiqueta-ok";
@@ -139,7 +139,6 @@ function mostrar(d) {
 function mostrarWiFi(w) {
   $("wifi-rede").textContent = w.modo === "celular" ? w.rede : w.rede + " (rede própria)";
   $("wifi-ip").textContent = w.ip;
-  $("wifi-mac").textContent = w.mac || "--";
   if (w.sinal === undefined) {
     $("wifi-sinal").textContent = "--";
     return;
@@ -206,7 +205,7 @@ function formatarTempo(segundos) {
   return s + "s";
 }
 
-// ===================== CALIBRACAO =====================
+// calibracao
 function mensagemCalibracao(texto, ok) {
   const p = $("mensagem-calibracao");
   p.textContent = texto;
@@ -272,7 +271,7 @@ $("restaurar").addEventListener("click", async () => {
   if (MODO_DEMO) mensagemCalibracao("Valores padrão restaurados (simulado).", true);
 });
 
-// ===================== INICIO =====================
+// inicio
 if (MODO_DEMO) $("modo-demo").hidden = false;
 // Pergunta de novo so depois da resposta anterior, para nao acumular pedidos no ESP32
 async function ciclo() {

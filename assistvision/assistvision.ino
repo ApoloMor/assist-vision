@@ -31,7 +31,7 @@ const int PINO_SERVO   = 13;
 const int PINO_BATERIA = 34;                    // entrada analogica que funciona com Wi-Fi ligado
 
 // Bateria
-const bool  BATERIA_INSTALADA = true;           // false se os resistores nao estiverem ligados
+const bool  BATERIA_INSTALADA = true;           // false se os resistores nn estiverem ligados
 const float FATOR_DIVISOR     = 2.0;            // dois resistores iguais dividem a tensao pela metade
 const float AJUSTE_BATERIA    = 1.00;           // calibrar: tensao no multimetro / tensao na pagina
 const float BATERIA_BAIXA     = 3.5;
@@ -58,16 +58,16 @@ const int PASSO          = 4;
 
 // Filtro e falhas
 const float SUAVIZACAO                = 0.4;     // 0 a 1: menor = mais estavel, maior = reage mais rapido
-const float ALCANCE_MAX_CM            = 200.0;   // acima disso o VL53L0X nao e confiavel
+const float ALCANCE_MAX_CM            = 200.0;   // acima disso o VL53L0X nn eh confiavel
 const int   INVALIDAS_PARA_FORA       = 5;       // leituras duvidosas seguidas ate considerar "nada na frente"
 const int   FALHAS_PARA_ERRO          = 5;
 const int   CONFIRMAR_LEITURAS        = 3;       // leituras seguidas pedindo o mesmo modo antes de trocar
-const uint32_t TEMPO_MEDICAO_US       = 100000;  // 100 ms por medicao: mais alcance e menos ruido
+const uint32_t TEMPO_MEDICAO_US       = 100000;  // 100 ms por medicao pra ter mais alcance e menos ruido
 const bool  MOSTRAR_LEITURAS          = false;   // true = mostra cada leitura crua no Monitor Serial
 const unsigned long TENTAR_SENSOR_MS  = 5000;
 const unsigned long LER_BATERIA_MS    = 2000;
 const unsigned long SEM_CONTATO_MS    = 8000;
-const unsigned long RECONECTAR_MS     = 10000;   // tenta reconectar o Wi-Fi a cada 10 s se cair
+const unsigned long RECONECTAR_MS     = 10000;   // tenta reconectar o Wi-Fi a cada 10s se cair
 
 enum Modo { REPOUSO, MEDIO, FORTE };
 
@@ -122,7 +122,7 @@ void tentarIniciarSensor() {
   ultimaTentativaSensor = millis();
   if (sensor.begin()) {
     sensor.configSensor(Adafruit_VL53L0X::VL53L0X_SENSE_LONG_RANGE);
-    sensor.setMeasurementTimingBudgetMicroSeconds(TEMPO_MEDICAO_US);
+    sensor.setMeasurementTimingBudgetMicroSeconds(TEMPO_MEDICAO_US); // 100 ms
     sensorOk = true;
     falhasSeguidas = 0;
     invalidasSeguidas = 0;
@@ -131,17 +131,18 @@ void tentarIniciarSensor() {
   }
 }
 
-// Devolve false se o sensor nao respondeu (problema de fio/hardware).
-// "valida" diz se a medida e confiavel. Medida duvidosa nao e usada.
+// Devolve false se o sensor nn respondeu (problema de fio/hardware)
+// "valida" diz se a medida eh confiavel. Medida duvidosa nn eh usada
 bool lerDistanciaCm(float& distancia, bool& valida) {
   VL53L0X_RangingMeasurementData_t medida;
-  VL53L0X_Error erro = sensor.rangingTest(&medida, false);
+  VL53L0X_Error erro = sensor.rangingTest(&medida, false); // recebe o numero do sensor
 
   if (erro != VL53L0X_ERROR_NONE) return false;
 
-  distancia = medida.RangeMilliMeter / 10.0;
-  valida = (medida.RangeStatus <= 2) && (distancia > 3) && (distancia <= ALCANCE_MAX_CM);
-
+  distancia = medida.RangeMilliMeter / 10.0; //pega o numero e passa pra cm
+  valida = (medida.RangeStatus <= 2) && (distancia > 3) && (distancia <= ALCANCE_MAX_CM); // descarte
+// precisa da biblioteca Adafruit_VL53L0X
+// media.Range.Status basicamente ve se o numero presta (bom ou ruim) 
   if (MOSTRAR_LEITURAS) {
     Serial.print("Leitura crua: ");
     Serial.print(distancia, 1);
@@ -179,7 +180,7 @@ void lerBateria() {
     soma += analogReadMilliVolts(PINO_BATERIA);
     delayMicroseconds(200);
   }
-  float agora = (soma / 32.0) / 1000.0 * FATOR_DIVISOR * AJUSTE_BATERIA;
+  float agora = (soma / 32.0) / 1000.0 * FATOR_DIVISOR * AJUSTE_BATERIA; // multiplicar por 2 pq o divisor dividiu td por 2
 
   if (!bateriaLida) {
     tensaoBateria = agora;
@@ -189,7 +190,7 @@ void lerBateria() {
   }
 }
 
-// A bateria de litio nao descarrega em linha reta: usa uma tabela tensao -> %
+// A bateria de litio nn descarrega em linha reta entt usa uma tabela tensao -> %
 int percentualBateria() {
   const float tensoes[]   = {3.30, 3.40, 3.50, 3.60, 3.70, 3.80, 3.90, 4.00, 4.10, 4.20};
   const int   percentuais[] = {   0,    3,    8,   18,   32,   48,   63,   78,   90,  100};
@@ -261,10 +262,11 @@ void salvarCalibracao() {
 // Conexao Wi-Fi
 void conectarWiFi() {
   WiFi.mode(WIFI_STA);
-  WiFi.setSleep(false);                          // sem economia de energia: responde sem atraso
+  WiFi.setSleep(false);     // sem economia de energia pra responder sem atraso
   WiFi.setAutoReconnect(true);
   WiFi.begin(CELULAR_REDE, CELULAR_SENHA);
 
+//espera ate 15s
   Serial.print("Conectando no roteador do celular");
   unsigned long inicio = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - inicio < TEMPO_CONEXAO_MS) {
@@ -272,7 +274,7 @@ void conectarWiFi() {
     Serial.print(".");
   }
   Serial.println();
-
+//se conectou
   if (WiFi.status() == WL_CONNECTED) {
     usandoCelular = true;
     wifiConectado = true;
@@ -314,7 +316,7 @@ void verificarWiFi() {
   else       registrarEvento("Wi-Fi do celular caiu. Tentando reconectar...");
 }
 
-// Mostra no historico por que o ESP32 reiniciou (ajuda a achar queda de energia)
+// Mostra no historico por que o ESP32 reiniciou pra ajudar a achar queda de energia
 void registrarMotivoReinicio() {
   esp_reset_reason_t motivo = esp_reset_reason();
   if (motivo == ESP_RST_BROWNOUT)                         registrarEvento("Reiniciou por queda de energia (bateria/servo)");
@@ -323,7 +325,7 @@ void registrarMotivoReinicio() {
                                                           registrarEvento("Reiniciou por travamento (watchdog)");
 }
 
-// Paginas
+// paginas
 void enviarArquivo(const char* caminho, const char* tipo) {
   File arquivo = LittleFS.open(caminho, "r");
   if (!arquivo) {
@@ -360,7 +362,6 @@ void rotaStatus() {
   wifi["modo"] = usandoCelular ? "celular" : "propria";
   wifi["rede"] = usandoCelular ? CELULAR_REDE : PROPRIA_REDE;
   wifi["ip"]   = usandoCelular ? WiFi.localIP().toString() : WiFi.softAPIP().toString();
-  wifi["mac"]  = usandoCelular ? WiFi.macAddress() : WiFi.softAPmacAddress();
   if (usandoCelular) wifi["sinal"] = WiFi.RSSI();
 
   JsonObject config = doc["config"].to<JsonObject>();
@@ -441,7 +442,7 @@ void rotaConfigPadrao() {
   responderJson(200, resposta);
 }
 
-// Setup
+// setup
 void setup() {
   Serial.begin(115200);
   registrarMotivoReinicio();
@@ -475,7 +476,7 @@ void setup() {
   registrarEvento("AssistVision ligado");
 }
 
-// Loop
+// loop
 void loop() {
   server.handleClient();
 
@@ -494,7 +495,8 @@ void loop() {
         leituraNova = true;
         float m = medianaDasUltimas(d);
         if (distanciaFiltrada >= DIST_FORA) distanciaFiltrada = m;   // voltou a ver: comeca do valor real
-        else distanciaFiltrada = SUAVIZACAO * m + (1 - SUAVIZACAO) * distanciaFiltrada;
+        else distanciaFiltrada = SUAVIZACAO * m + (1 - SUAVIZACAO) * distanciaFiltrada; // faz a suavizacao 
+        //distancia filtrada = 0.4 * m + 0.6 * distancia filtradaok
       } else {
         // Leitura duvidosa: nao entra na media. Mantem o ultimo valor bom por um tempo.
         invalidasSeguidas++;
@@ -512,7 +514,7 @@ void loop() {
         registrarEvento("Sensor parou de responder");
       }
     }
-
+// fazer a confirmacao (3 vezes)
     Modo novoModo = sensorOk ? decidirModo(distanciaFiltrada, modoAtual) : REPOUSO;
 
     if (!sensorOk || novoModo == modoAtual) {
