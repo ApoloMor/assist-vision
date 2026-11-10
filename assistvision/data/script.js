@@ -7,7 +7,7 @@ const SINAL_PERDIDO_MS = 6000;   // sem resposta por esse tempo = sinal perdido
 const MODO_DEMO = location.protocol === "file:";
 
 const MENSAGENS_ERRO = {
-  SENSOR_AUSENTE: "Sensor de distância não encontrado. Confira os fios VCC (3V3), GND, SDA (33) e SCL (32).",
+  SENSOR_AUSENTE: "Sensor de distância não encontrado. Confira os fios VCC (5V), GND, SDA (33) e SCL (32).",
   SENSOR_PAROU: "O sensor parou de responder. Tentando reconectar a cada 5 segundos.",
   BATERIA_BAIXA: "Bateria baixa. Recarregue pelo USB-C do carregador.",
   BATERIA_CRITICA: "Bateria crítica. O dispositivo pode desligar a qualquer momento.",
