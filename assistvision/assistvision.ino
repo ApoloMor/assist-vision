@@ -360,6 +360,7 @@ void rotaStatus() {
   wifi["modo"] = usandoCelular ? "celular" : "propria";
   wifi["rede"] = usandoCelular ? CELULAR_REDE : PROPRIA_REDE;
   wifi["ip"]   = usandoCelular ? WiFi.localIP().toString() : WiFi.softAPIP().toString();
+  wifi["mac"]  = usandoCelular ? WiFi.macAddress() : WiFi.softAPmacAddress();
   if (usandoCelular) wifi["sinal"] = WiFi.RSSI();
 
   JsonObject config = doc["config"].to<JsonObject>();
