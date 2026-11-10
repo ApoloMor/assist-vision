@@ -7,7 +7,7 @@ const SINAL_PERDIDO_MS = 6000;   // sem resposta por esse tempo = sinal perdido
 const MODO_DEMO = location.protocol === "file:";
 
 const MENSAGENS_ERRO = {
-  SENSOR_AUSENTE: "Sensor de distância não encontrado. Confira os fios VCC (3V3), GND, SDA (21) e SCL (22).",
+    SENSOR_AUSENTE: "Sensor de distância não encontrado. Confira os fios VCC, GND, SDA (33) e SCL (32).",
   SENSOR_PAROU: "O sensor parou de responder. Tentando reconectar a cada 5 segundos.",
   BATERIA_BAIXA: "Bateria baixa. Recarregue pelo USB-C do carregador.",
   BATERIA_CRITICA: "Bateria crítica. O dispositivo pode desligar a qualquer momento.",
@@ -43,7 +43,7 @@ function statusDemo() {
     angulo: demo.angulo,
     sensorOk: true,
     tempoLigado: Math.floor(t),
-    wifi: { modo: "celular", rede: "Celular do grupo", ip: "192.168.43.25", sinal: -58 },
+    wifi: { modo: "celular", rede: "Celular do grupo", ip: "192.168.43.25", mac: "AA:BB:CC:DD:EE:FF", sinal: -58 },
     config: { distMedio: demo.distMedio, distForte: demo.distForte },
     bateria: { disponivel: true, tensao: 3.86, percentual: 66 },
     erros: [],
@@ -139,6 +139,8 @@ function mostrar(d) {
 function mostrarWiFi(w) {
   $("wifi-rede").textContent = w.modo === "celular" ? w.rede : w.rede + " (rede própria)";
   $("wifi-ip").textContent = w.ip;
+  $("wifi-ip").textContent = w.ip;
+  $("wifi-mac").textContent = w.mac || "--";
   if (w.sinal === undefined) {
     $("wifi-sinal").textContent = "--";
     return;
